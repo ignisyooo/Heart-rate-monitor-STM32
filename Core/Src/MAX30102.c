@@ -10,39 +10,28 @@
 
 #include "MAX30102.h"
 
-
-
 /* Array with addresses and values for configuration of registers */
-static MAX30102_config_T config_data[]={
-		{
-				.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02 /* Enable interrupt from temperature conversion end */
-		},
-		{
-				.mem_adress = REG_INTR_ENABLE_1, .Value = 0x48
-		},
-		/* FIFO pointers setting */
-		{
-				.mem_adress = REG_FIFO_WR_PTR, .Value = 0x00
-		},
-		{
-				.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
-		},
-		{
-				.mem_adress = REG_OVF_COUNTER, .Value = 0x00
-		},
-		/* FIFO config settings - sample average = 4, fifo rollover = enable(?), fifo almost full value = 17 */
-		{
-				.mem_adress = REG_FIFO_CONFIG, .Value = 0x1F
-		},
-		/* Set mode. HR mode - 0b010; SpO2 mode - 0b011; Multi-LED mode - 0b111 */
-		{
-				.mem_adress = REG_MODE_CONFIG, .Value = 0x03
-		},
-		/* SpO2 mode settings. ADC range (15,63 / 4096) - 01; Sample frequence - 100 - 001; LED pulse width - 411us - 11 */
-		{
-				.mem_adress = REG_SPO2_CONFIG, .Value = 0x27,
-		}
-};
+static MAX30102_config_T config_data[] = {
+	{
+		.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02 /* Enable interrupt from temperature conversion end */
+	},
+	{.mem_adress = REG_INTR_ENABLE_1, .Value = 0x48},
+	/* FIFO pointers setting */
+	{
+		.mem_adress = REG_FIFO_WR_PTR, .Value = 0x00},
+	{.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00},
+	{.mem_adress = REG_OVF_COUNTER, .Value = 0x00},
+	/* FIFO config settings - sample average = 4, fifo rollover = enable(?), fifo almost full value = 17 */
+	{
+		.mem_adress = REG_FIFO_CONFIG, .Value = 0x1F},
+	/* Set mode. HR mode - 0b010; SpO2 mode - 0b011; Multi-LED mode - 0b111 */
+	{
+		.mem_adress = REG_MODE_CONFIG, .Value = 0x03},
+	/* SpO2 mode settings. ADC range (15,63 / 4096) - 01; Sample frequence - 100 - 001; LED pulse width - 411us - 11 */
+	{
+		.mem_adress = REG_SPO2_CONFIG,
+		.Value = 0x27,
+	}};
 
 static MAX30102_STATE StateMachine;
 
@@ -84,7 +73,6 @@ MAX30102_STATUS Max30102_ReadReg(uint8_t mem_adress, uint8_t *data)
 	return MAX30102_OK;
 }
 
-
 MAX30102_STATUS Max30102_SetIdleCurrent(uint8_t led1, uint8_t led2)
 {
 	if (MAX30102_OK != Max30102_WriteReg(REG_LED1_PA, led1))
@@ -99,7 +87,7 @@ MAX30102_STATUS Max30102_SetIdleCurrent(uint8_t led1, uint8_t led2)
 	return MAX30102_OK;
 }
 
-MAX30102_STATUS Max30102_ReadFifo(volatile uint32_t * const pun_red_led, volatile uint32_t *const pun_ir_led)
+MAX30102_STATUS Max30102_ReadFifo(volatile uint32_t *const pun_red_led, volatile uint32_t *const pun_ir_led)
 {
 	*pun_red_led = 0;
 	*pun_ir_led = 0;
@@ -116,7 +104,7 @@ MAX30102_STATUS Max30102_ReadFifo(volatile uint32_t * const pun_red_led, volatil
 	return MAX30102_OK;
 }
 
-MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t * const status)
+MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t *const status)
 {
 	*status = 0;
 	uint8_t tmp;
@@ -133,10 +121,10 @@ MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t * const status)
 	return MAX30102_OK;
 }
 
-void Max30102_FIFO_data_sort(FIFO_buffer * fifo, uint8_t *isFingerOn)
+void Max30102_FIFO_data_sort(FIFO_buffer *fifo, uint8_t *isFingerOn)
 {
 	while (MAX30102_OK != Max30102_ReadFifo(&(fifo->RedBuffer[fifo->BufferHead]), &(fifo->IrBuffer[fifo->BufferHead])))
-					;
+		;
 	if (*isFingerOn)
 	{
 		if (fifo->IrBuffer[fifo->BufferHead] < MAX30102_IR_VALUE_FINGER_OUT_SENSOR)
@@ -156,7 +144,8 @@ void Max30102_InterruptCallback(MAX30102_T *self)
 	uint8_t interrupt_status = 0;
 	uint8_t temp_int = 0;
 	uint8_t temp_fraction = 0;
-	while (MAX30102_OK != Max30102_ReadInterruptStatus(&interrupt_status));
+	while (MAX30102_OK != Max30102_ReadInterruptStatus(&interrupt_status))
+		;
 
 	/* Almost Full FIFO Interrupt handle */
 	if (interrupt_status & (1 << INT_A_FULL_BIT))
@@ -177,9 +166,8 @@ void Max30102_InterruptCallback(MAX30102_T *self)
 	{
 		Max30102_ReadReg(REG_TEMP_INTR, &temp_int);
 		Max30102_ReadReg(REG_TEMP_FRAC, &temp_fraction);
-		self->TmpValue = (float)temp_int + ((float)temp_fraction*0.0625);
+		self->TmpValue = (float)temp_int + ((float)temp_fraction * 0.0625);
 	}
-
 }
 
 void Max30102_StateMachine(MAX30102_T *self)
@@ -208,7 +196,7 @@ void Max30102_StateMachine(MAX30102_T *self)
 		}
 		else
 		{
-			Max30102_SetIdleCurrent(MAX30102_RED_LED_CURRENT_LOW,MAX30102_IR_LED_CURRENT_LOW);
+			Max30102_SetIdleCurrent(MAX30102_RED_LED_CURRENT_LOW, MAX30102_IR_LED_CURRENT_LOW);
 			StateMachine = MAX30102_STATE_BEGIN;
 		}
 		break;
@@ -222,7 +210,7 @@ void Max30102_StateMachine(MAX30102_T *self)
 		}
 		else
 		{
-			Max30102_SetIdleCurrent(MAX30102_RED_LED_CURRENT_LOW,MAX30102_IR_LED_CURRENT_LOW);
+			Max30102_SetIdleCurrent(MAX30102_RED_LED_CURRENT_LOW, MAX30102_IR_LED_CURRENT_LOW);
 			StateMachine = MAX30102_STATE_BEGIN;
 		}
 		break;
@@ -237,7 +225,7 @@ void Max30102_StateMachine(MAX30102_T *self)
 		}
 		else
 		{
-			Max30102_SetIdleCurrent(MAX30102_RED_LED_CURRENT_LOW,MAX30102_IR_LED_CURRENT_LOW);
+			Max30102_SetIdleCurrent(MAX30102_RED_LED_CURRENT_LOW, MAX30102_IR_LED_CURRENT_LOW);
 			StateMachine = MAX30102_STATE_BEGIN;
 		}
 		break;
@@ -246,16 +234,15 @@ void Max30102_StateMachine(MAX30102_T *self)
 
 MAX30102_STATUS Max30102_Init(MAX30102_T *self, I2C_HandleTypeDef *i2c)
 {
-	self->i2c = &hi2c1;
+	//self->i2c = &hi2c1;
 	if (MAX30102_OK != Max30102_Reset()) /*resets the MAX30102 */
 	{
 		return MAX30102_ERROR;
 	}
 
-
-	for(int idx = 0; idx <= GET_SIZE_OF_ARRAY(config_data); ++idx)
+	for (int idx = 0; idx <= GET_SIZE_OF_ARRAY(config_data); ++idx)
 	{
-		if(MAX30102_OK != Max30102_WriteReg(config_data[idx].mem_adress, config_data[idx].Value))
+		if (MAX30102_OK != Max30102_WriteReg(config_data[idx].mem_adress, config_data[idx].Value))
 		{
 			return MAX30102_ERROR;
 		}
