@@ -1,10 +1,3 @@
-/*
- * MAX30102.c
- *
- *  Created on: Apr 23, 2021
- *      Author: Rzeszutko
- */
-
 #include "main.h"
 #include "i2c.h"
 
@@ -204,8 +197,9 @@ void Max30102_StateMachine(MAX30102_T *self)
 	case MAX30102_STATE_CALCULATE_HR:
 		if (self->IsFingerOnScreen)
 		{
-			/* TO DO --> CALCULATE DATA ALOGORITHM*/
+			maxim_heart_rate_and_oxygen_saturation(self->FIFO.IrBuffer, self->FIFO.RedBuffer, MAX30102_BUFFER_LENGTH - MAX30102_SAMPLES_PER_SECOND, self->FIFO.BufferTail, &(self->Sp02Value), &(self->Sp02IsValid), &(self->HeartRate), &(self->IsHrValid));
 			self->FIFO.CollectedSamples = 0;
+			self->FIFO.BufferTail = (self->FIFO.BufferTail + MAX30102_SAMPLES_PER_SECOND) % MAX30102_BUFFER_LENGTH;
 			StateMachine = MAX30102_STATE_COLLECT_NEXT_PORTION;
 		}
 		else
@@ -234,7 +228,7 @@ void Max30102_StateMachine(MAX30102_T *self)
 
 MAX30102_STATUS Max30102_Init(MAX30102_T *self, I2C_HandleTypeDef *i2c)
 {
-	//self->i2c = &hi2c1;
+	self->i2c = &hi2c1;
 	if (MAX30102_OK != Max30102_Reset()) /*resets the MAX30102 */
 	{
 		return MAX30102_ERROR;

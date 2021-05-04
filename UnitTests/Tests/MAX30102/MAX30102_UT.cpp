@@ -2,12 +2,14 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "Stubs/Stubs.h"
 #include "Mock_HAL_Drivers.h"
 
 using ::testing::_;
 using ::testing::Assign;
 using ::testing::DoAll;
 using ::testing::Return;
+using ::testing::SetArrayArgument;
 
 extern "C"
 {
@@ -47,7 +49,7 @@ public:
 
 Mock_HAL_Drivers *MAX30102_test::mock_HAL_Drivers;
 
-TEST_F(MAX30102_test, Max30102_WriteReg_test)
+TEST_F(MAX30102_test, Max30102_WriteReg_overwrite_buffer)
 {
     MAX30102_STATUS retVal;
     uint8_t mem_adress = 0;
@@ -73,4 +75,57 @@ TEST_F(MAX30102_test, Max30102_WriteReg_test)
     {
         EXPECT_EQ(buffer[idx], test_buffer[idx]) << "Fail on idx: " << idx;
     }
+}
+
+TEST_F(MAX30102_test, Max30102_ReadReg_read_entire_buffer)
+{
+    MAX30102_STATUS retVal;
+
+    uint8_t test_buffer[BUFFER_SIZE];
+    uint8_t mem_adress = 0;
+
+    for (int idx = 0; idx < BUFFER_SIZE; ++idx)
+    {
+        buffer[idx] = idx;
+        test_buffer[idx] = 0;
+    }
+
+    EXPECT_CALL(*mock_HAL_Drivers, HAL_I2C_Mem_Read(_, _, _, _, test_buffer, _, _))
+        .WillOnce(DoAll(
+            SetArrayArgument<4>(buffer + 0, buffer + BUFFER_SIZE),
+            Return(HAL_OK)));
+
+    retVal = Max30102_ReadReg(mem_adress, test_buffer);
+
+    EXPECT_EQ(retVal, MAX30102_OK);
+
+    for (int idx = 0; idx < BUFFER_SIZE; ++idx)
+    {
+        EXPECT_EQ(buffer[idx], idx);
+        EXPECT_EQ(test_buffer[idx], idx);
+    }
+}
+
+TEST_F(MAX30102_test, Max30102_SetIdleCurrent)
+{
+    MAX30102_STATUS retVal;
+
+    uint8_t IR_LED = MAX30102_RED_LED_CURRENT_HIGH;
+    uint8_t RED_LED = MAX30102_IR_LED_CURRENT_LOW;
+    memset(buffer, 0, sizeof(buffer));
+    uint8_t idx = 0;
+
+    EXPECT_CALL(*mock_HAL_Drivers, HAL_I2C_Mem_Write(_, _, _, _, _, _, _))
+        .Times(2)
+        .WillRepeatedly(DoAll(
+            Assign(buffer + 0, IR_LED),
+            Assign(buffer + 1, RED_LED),
+            Return(HAL_OK)));
+
+    retVal = Max30102_SetIdleCurrent(IR_LED, RED_LED);
+
+    EXPECT_EQ(retVal, MAX30102_OK);
+
+    EXPECT_EQ(buffer[0], MAX30102_RED_LED_CURRENT_HIGH);
+    EXPECT_EQ(buffer[1], MAX30102_IR_LED_CURRENT_LOW);
 }

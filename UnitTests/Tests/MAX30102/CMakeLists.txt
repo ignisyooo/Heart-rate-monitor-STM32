@@ -11,7 +11,7 @@ set(HEADER_DIR ${APP_DIR}/Core/Inc)
 
 #####################################   TESTED COMPONENT LIBRARY   #########################################
 include_directories(
-    stubs
+    stubs/.
     ${HEADER_DIR}
 )
 

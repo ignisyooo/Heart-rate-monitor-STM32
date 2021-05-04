@@ -1,5 +1,8 @@
-#include "MAX30102.h"
-#include "i2c.h"
-#include "main.h"
+#ifndef STUBS_H
+#define STUBS_H
 
-extern I2C_HandleTypeDef hi2c1;
+#include "i2c.h"
+
+I2C_HandleTypeDef hi2c1;
+
+#endif /* STUBS_H */
