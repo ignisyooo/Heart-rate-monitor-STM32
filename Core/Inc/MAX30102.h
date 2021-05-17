@@ -197,6 +197,7 @@ MAX30102_STATUS Max30102_Init(I2C_HandleTypeDef *i2c);
 MAX30102_STATUS Max30102_ReadFifo(volatile uint32_t *red_led_ptr, volatile uint32_t *ir_led_ptr);
 MAX30102_STATUS Max30102_WriteReg(uint8_t mem_addr, uint8_t data);
 MAX30102_STATUS Max30102_ReadReg(uint8_t mem_addr, uint8_t *data);
+MAX30102_STATUS Max30102_SetMode(uint8_t mem_addr, uint8_t data);
 MAX30102_STATUS Max30102_Reset(void);
 void Max30102_DataAnalysis(void);
 

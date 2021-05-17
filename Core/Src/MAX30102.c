@@ -4,6 +4,7 @@
 #include "MAX30102.h"
 #include "algorithm.h"
 
+
 /****************************************************************************
  * Static variables															*
  ***************************************************************************/
@@ -15,24 +16,29 @@ static MAX30102_STATE StateMachine;
 /* Array with addresses and values for configuration of registers */
 static MAX30102_config_T config_data[] = {
 	{
-			.mem_adress = REG_INTR_ENABLE_1, .Value = 0x48
+		.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02
+	},
+	{
+		.mem_adress = REG_INTR_ENABLE_1, .Value = 0xc0 //0x48
 	},
 	/* FIFO pointers setting */
 	{
 		.mem_adress = REG_FIFO_WR_PTR, .Value = 0x00
 	},
 	{
-			.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
+		.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
 	},
 	{
-			.mem_adress = REG_OVF_COUNTER, .Value = 0x00
+		.mem_adress = REG_OVF_COUNTER, .Value = 0x00
 	},
 	/* FIFO config settings - sample average = 4, fifo rollover = enable(?), fifo almost full value = 17 */
 	{
-		.mem_adress = REG_FIFO_CONFIG, .Value = 0x1F},
+		.mem_adress = REG_FIFO_CONFIG, .Value = 0x1F
+	},
 	/* Set mode. HR mode - 0b010; SpO2 mode - 0b011; Multi-LED mode - 0b111 */
 	{
-		.mem_adress = REG_MODE_CONFIG, .Value = 0x03},
+		.mem_adress = REG_MODE_CONFIG, .Value = 0x03
+	},
 	/* SpO2 mode settings. ADC range (15,63 / 4096) - 01; Sample frequence - 100 - 001; LED pulse width - 411us - 11 */
 	{
 		.mem_adress = REG_SPO2_CONFIG, .Value = 0x27,
@@ -53,6 +59,21 @@ MAX30102_STATUS Max30102_WriteReg(uint8_t mem_addr, uint8_t data)
 MAX30102_STATUS Max30102_ReadReg(uint8_t mem_addr, uint8_t *data)
 {
 	if (HAL_OK != HAL_I2C_Mem_Read(hr_sensor.i2c, MAX30102_ADDRESS, mem_addr, 1, data, 1, I2C_TIMEOUT))
+	{
+		return MAX30102_ERROR;
+	}
+	return MAX30102_OK;
+}
+
+MAX30102_STATUS Max30102_SetMode(uint8_t mem_addr, uint8_t data)
+{
+	uint8_t tmp = 0;
+	if (HAL_OK != HAL_I2C_Mem_Read(hr_sensor.i2c, MAX30102_ADDRESS, mem_addr, 1, &tmp, 1, I2C_TIMEOUT))
+	{
+		return MAX30102_ERROR;
+	}
+	tmp |= data;
+	if (HAL_OK != HAL_I2C_Mem_Write(hr_sensor.i2c, MAX30102_ADDRESS, mem_addr, 1, &tmp, 1, I2C_TIMEOUT))
 	{
 		return MAX30102_ERROR;
 	}
@@ -94,6 +115,26 @@ void Max30102_DataAnalysis(void)
 	fifo.CollectedSamples++;
 }
 
+MAX30102_STATUS Max30102_ReadTemperature(void)
+{
+	uint8_t temp_int;
+	uint8_t temp_fraction;
+
+	if(MAX30102_OK != Max30102_ReadReg(REG_TEMP_INTR, &temp_int))
+	{
+		return MAX30102_ERROR;
+	}
+	if(MAX30102_OK != Max30102_ReadReg(REG_TEMP_FRAC, &temp_fraction))
+	{
+		return MAX30102_ERROR;
+	}
+
+	hr_sensor.TmpValue = (float)temp_int + (((float)temp_fraction) * 0.0625);
+
+	return MAX30102_OK;
+}
+
+
 /****************************************************************************
  * Interrupts handling														*
  ***************************************************************************/
@@ -108,6 +149,12 @@ MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t *Status)
 	}
 
 	*Status |= tmp & 0xE1; // 3 highest bits
+
+	if (MAX30102_OK != Max30102_ReadReg(REG_INTR_STATUS_2, &tmp))
+	{
+		return MAX30102_ERROR;
+	}
+	*Status |= tmp & 0x02;
 
 	return MAX30102_OK;
 }
@@ -131,6 +178,12 @@ void Max30102_InterruptCallback(void)
 	{
 		Max30102_DataAnalysis();
 	}
+
+	if (Status & (1 << INT_DIE_TEMP_RDY_BIT))
+	{
+		Max30102_ReadTemperature();
+	}
+
 }
 
 /****************************************************************************
@@ -252,7 +305,7 @@ MAX30102_STATUS Max30102_Init(I2C_HandleTypeDef *i2c)
 
 	for (int idx = 0; idx <= GET_SIZE_OF_ARRAY(config_data); ++idx)
 	{
-		if (MAX30102_OK != Max30102_WriteReg(config_data[idx].mem_adress, config_data[idx].Value))
+		if (MAX30102_OK != Max30102_SetMode(config_data[idx].mem_adress, config_data[idx].Value))
 		{
 			return MAX30102_ERROR;
 		}
