@@ -335,7 +335,7 @@ void ssd1331_display_string(uint8_t chXpos, uint8_t chYpos,
 			chYpos += chSize;
 			if (chYpos > (OLED_HEIGHT - chSize)) {
 				chYpos = chXpos = 0;
-				ssd1331_clear_screen(0x00);
+				//ssd1331_clear_screen(0x00);
 			}
 		}
 
