@@ -1,7 +1,7 @@
 #include "screen.h"
 #include "SSD1331.h"
 #include "main.h"
-
+#include "bitmaps.h"
 /*
  * screen.c
  *
@@ -10,6 +10,8 @@
  */
 #define OLED_WIDTH                      96
 #define OLED_HEIGHT                     64
+
+
 
 
 void Display_Value(uint8_t pos_x, uint8_t pos_y, uint32_t value){
@@ -41,28 +43,11 @@ void Display_text(uint8_t chXpos, uint8_t chYpos,
 }
 
 void Display_fingerprint(void){
-	const char Bmp []= {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xf8, 0x00, 0x00, 0x00, 0x00, 0x1c, 0x04,
-			0x00, 0x00, 0x00, 0x00, 0x23, 0xf3, 0x00, 0x00, 0x00, 0x00, 0xcc, 0x0c, 0x80, 0x00, 0x00, 0x01,
-			0x31, 0x83, 0x20, 0x00, 0x00, 0x02, 0x46, 0x38, 0x90, 0x00, 0x00, 0x04, 0xcc, 0x0c, 0x40, 0x00,
-			0x00, 0x09, 0x31, 0x83, 0x20, 0x00, 0x00, 0x0a, 0x46, 0x69, 0x10, 0x00, 0x00, 0x14, 0x88, 0x16,
-			0xc8, 0x00, 0x00, 0x25, 0x33, 0xc9, 0x24, 0x00, 0x00, 0x0b, 0x44, 0x24, 0x94, 0x00, 0x00, 0x12,
-			0x88, 0x12, 0x50, 0x00, 0x00, 0x04, 0x93, 0xc9, 0x4a, 0x00, 0x00, 0x05, 0x14, 0x21, 0x22, 0x00,
-			0x00, 0x29, 0x29, 0x90, 0xa2, 0x00, 0x00, 0x4a, 0x29, 0x40, 0xa2, 0x00, 0x00, 0x14, 0x52, 0x44,
-			0xaa, 0x00, 0x00, 0x24, 0x52, 0x94, 0xaa, 0x00, 0x00, 0x48, 0xa0, 0x94, 0x2a, 0x00, 0x00, 0x11,
-			0x29, 0x25, 0x2a, 0x00, 0x00, 0x20, 0x52, 0x29, 0x4a, 0x00, 0x00, 0x64, 0x95, 0x4a, 0x52, 0x00,
-			0x00, 0x49, 0x2a, 0x52, 0x12, 0x00, 0x00, 0x12, 0x10, 0xa4, 0x24, 0x00, 0x00, 0x24, 0x95, 0x24,
-			0x28, 0x00, 0x00, 0x49, 0x29, 0x44, 0x4a, 0x00, 0x00, 0x32, 0x52, 0x82, 0x4a, 0x00, 0x00, 0x4c,
-			0xa4, 0xa2, 0x44, 0x00, 0x00, 0x13, 0x49, 0x11, 0x22, 0x00, 0x00, 0x64, 0x92, 0x08, 0x90, 0x00,
-			0x00, 0x09, 0x24, 0x44, 0x48, 0x00, 0x00, 0x30, 0xcc, 0xa2, 0x24, 0x00, 0x00, 0x01, 0x31, 0xa1,
-			0x14, 0x00, 0x00, 0x06, 0x4c, 0x08, 0xc8, 0x00, 0x00, 0x09, 0x90, 0x06, 0x24, 0x00, 0x00, 0x06,
-			0x61, 0xc1, 0x18, 0x00, 0x00, 0x08, 0x82, 0x24, 0x80, 0x00, 0x00, 0x01, 0x0c, 0x19, 0x30, 0x00,
-			0x00, 0x01, 0x30, 0xc4, 0xc0, 0x00, 0x00, 0x02, 0xc8, 0x33, 0x20, 0x00, 0x00, 0x01, 0x33, 0x8c,
-			0xc0, 0x00, 0x00, 0x00, 0x4c, 0x63, 0x00, 0x00, 0x00, 0x00, 0x90, 0x98, 0x80, 0x00, 0x00, 0x00,
-			0x21, 0x46, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x00, 0x00};
-	  char * pchBmp = Bmp;
+
 	  Display_text(0,48,"PUT YOUR FINGER", FONT_1206, WHITE);
-	  ssd1331_draw_bitmap(24, 0, pchBmp,48, 48, WHITE);
+	  ssd1331_draw_bitmap(24, 0, Bmp_fingerprint, 48, 48, WHITE);
 }
+
 void Display_pulse(uint32_t HeartRate, uint32_t Sat, uint32_t Temp){
 
 	Display_text(0,0,"Rate", FONT_1206, WHITE);
@@ -78,11 +63,91 @@ void Display_pulse(uint32_t HeartRate, uint32_t Sat, uint32_t Temp){
 }
 
 void Display_heart(void){
-	const char Bmp []= {0x00, 0x00, 0x00, 0x07, 0x83, 0xc0, 0x1d, 0xc7, 0xf0, 0x30, 0xf8, 0xf8, 0x21, 0xf9, 0xf8, 0x67,
-			0xf3, 0xfc, 0x67, 0xff, 0xfc, 0x6f, 0xff, 0xfc, 0x7f, 0xff, 0xfc, 0x3f, 0xff, 0xf8, 0x3f, 0xff,
-			0xf8, 0x3f, 0xff, 0xf8, 0x1f, 0xff, 0xf0, 0x0f, 0xff, 0xf0, 0x0f, 0xff, 0xe0, 0x07, 0xff, 0xc0,
-			0x03, 0xff, 0x80, 0x01, 0xff, 0x00, 0x00, 0xfe, 0x00, 0x00, 0x7c, 0x00, 0x00, 0x38, 0x00, 0x00,
-			0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-		  char * pchBmp = Bmp;
-		  ssd1331_draw_bitmap(72, 0, pchBmp, 24, 24, RED);
+
+	  ssd1331_draw_bitmap(67, 4, Bmp_heart, 24, 24, RED);
 }
+
+void Display_heartpulse(int sec){
+
+	HAL_Delay(1000);
+	for(int i = 0; i < sec; i++){
+
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_0, 64, 64, RED);
+
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_0, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_1, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_1, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_2, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_2, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_3, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_3, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_4, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_4, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_5, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_5, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_6, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_6, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_7, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_7, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_8, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_8, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_9, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_9, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_10, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_10, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_11, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_11, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_12, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_12, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_13, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_13, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_14, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_14, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_15, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_15, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_16, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_16, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_17, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_17, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_18, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_18, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_19, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_19, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_20, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_20, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_21, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_21, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_22, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_22, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_23, 64, 64, RED);
+		HAL_Delay(00);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_23, 64, 64, BLACK);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_24, 64, 64, RED);
+		HAL_Delay(10);
+		ssd1331_draw_bitmap(0, 0, Bmp_heartpulse_frame_24, 64, 64, BLACK);
+	}
+}
+

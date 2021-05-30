@@ -14,5 +14,6 @@ void Display_text(uint8_t chXpos, uint8_t chYpos,const uint8_t *pchString, uint8
 void Display_heart(void);
 void Display_pulse(uint32_t, uint32_t, uint32_t);
 void Display_fingerprint(void);
+void Display_heartpulse(int);
 
 #endif /* SCREEN_H_ */

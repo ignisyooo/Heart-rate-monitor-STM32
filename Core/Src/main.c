@@ -22,7 +22,7 @@
 #include "i2c.h"
 #include "spi.h"
 #include "gpio.h"
-
+#include "../bitmaps.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MAX30102.h"
@@ -96,9 +96,10 @@ int main(void)
   Max30102_Init(&hi2c1);
   int32_t i,j,k = 0;
 
-  ssd1331_clear_screen(0x0000);
   Display_fingerprint();
-  HAL_Delay(1000);
+  HAL_Delay(3000);
+  ssd1331_clear_screen(0x0000);
+  Display_heartpulse(5);
   ssd1331_clear_screen(0x0000);
   /* USER CODE END 2 */
 
@@ -106,14 +107,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //ssd1331_display_string(0, 0, "Hello", FONT_1608, GREEN);
 
-	  Display_pulse(123+j,200+k,456+j);
 	  //Max30102_StateMachine();
-
-
-	  //Display_Value(2,2,100+j);
-	  //Display_Value(70,40,100+k);
+	  Display_pulse(123+j,200+k,456+j);
 
 	  if(50 == j){
 		  j = 0;
