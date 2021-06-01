@@ -22,12 +22,12 @@
 #include "i2c.h"
 #include "spi.h"
 #include "gpio.h"
-#include "../bitmaps.h"
+#include "bitmaps.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "MAX30102.h"
 #include "SSD1331.h"
-#include "../screen.h"
+#include "screen.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,32 +94,13 @@ int main(void)
   /* USER CODE BEGIN 2 */
   ssd1331_init();
   Max30102_Init(&hi2c1);
-  int32_t i,j,k = 0;
-
-  Display_fingerprint();
-  HAL_Delay(3000);
-  ssd1331_clear_screen(0x0000);
-  Display_heartpulse(5);
-  ssd1331_clear_screen(0x0000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-	  //Max30102_StateMachine();
-	  Display_pulse(123+j,200+k,456+j);
-
-	  if(50 == j){
-		  j = 0;
-		  k++;
-	  }
-
-	  if(20 == k){
-		  k = 0;
-	  }
-	  j++;
+	  Max30102_StateMachine();
 
     /* USER CODE END WHILE */
 
