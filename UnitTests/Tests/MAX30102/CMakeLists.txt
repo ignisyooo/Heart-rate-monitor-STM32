@@ -17,6 +17,7 @@ include_directories(
 
 add_library(${TEST_LIB}
     ${SOURCE_DIR}/MAX30102.c
+    ${SOURCE_DIR}/algorithm.c
 )
 
 target_link_libraries(${TEST_LIB} PRIVATE
@@ -28,10 +29,15 @@ add_executable(${LOCAL_TARGET}
     MAX30102_UT.cpp
 )
 
+target_compile_definitions(${LOCAL_TARGET} PUBLIC
+    UNIT_TESTING
+)
+
 target_link_libraries(${LOCAL_TARGET} PRIVATE
     ${TEST_LIB}
     gtest_main
     gmock_main
+    gcov
 
     Mock_HAL_Drivers
 )

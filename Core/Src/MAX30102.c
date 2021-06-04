@@ -1,48 +1,50 @@
 #include "main.h"
 #include "i2c.h"
+#include "string.h"
 
 #include "MAX30102.h"
 #include "algorithm.h"
 
+#include "Unit_tests.h"
 
 /****************************************************************************
  * Static variables															*
  ***************************************************************************/
 
-static volatile FIFO_buffer fifo;
-static MAX30102_T hr_sensor;
-static MAX30102_STATE StateMachine;
+volatile FIFO_buffer fifo;
+MAX30102_T hr_sensor;
+MAX30102_STATE StateMachine;
 
 /* Array with addresses and values for configuration of registers */
 static MAX30102_config_T config_data[] = {
 	{
-		.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02
+			.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02
 	},
 	{
-		.mem_adress = REG_INTR_ENABLE_1, .Value = 0xc0 //0x48
+			.mem_adress = REG_INTR_ENABLE_1, .Value = 0xc0
 	},
 	/* FIFO pointers setting */
 	{
 		.mem_adress = REG_FIFO_WR_PTR, .Value = 0x00
 	},
 	{
-		.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
+			.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
 	},
 	{
-		.mem_adress = REG_OVF_COUNTER, .Value = 0x00
+			.mem_adress = REG_OVF_COUNTER, .Value = 0x00
 	},
 	/* FIFO config settings - sample average = 4, fifo rollover = enable(?), fifo almost full value = 17 */
 	{
-		.mem_adress = REG_FIFO_CONFIG, .Value = 0x1F
-	},
+		.mem_adress = REG_FIFO_CONFIG, .Value = 0x1F},
 	/* Set mode. HR mode - 0b010; SpO2 mode - 0b011; Multi-LED mode - 0b111 */
 	{
-		.mem_adress = REG_MODE_CONFIG, .Value = 0x03
-	},
+		.mem_adress = REG_MODE_CONFIG, .Value = 0x03},
 	/* SpO2 mode settings. ADC range (15,63 / 4096) - 01; Sample frequence - 100 - 001; LED pulse width - 411us - 11 */
 	{
-		.mem_adress = REG_SPO2_CONFIG, .Value = 0x27,
-	}};
+		.mem_adress = REG_SPO2_CONFIG,
+		.Value = 0x27,
+	}
+};
 
 /****************************************************************************
  * Read/Write functions														*
@@ -92,7 +94,7 @@ MAX30102_STATUS Max30102_ReadFifo(volatile uint32_t *red_led_ptr, volatile uint3
 	}
 
 	*red_led_ptr += ((((uint32_t)i2c_fifo_data[0]) << 16) | (((uint32_t)i2c_fifo_data[1]) << 8) | ((uint32_t)i2c_fifo_data[2])) & 0x3FFFFU;
-	*ir_led_ptr  += ((((uint32_t)i2c_fifo_data[3]) << 16) | (((uint32_t)i2c_fifo_data[4]) << 8) | ((uint32_t)i2c_fifo_data[5])) & 0x3FFFFU;
+	*ir_led_ptr += ((((uint32_t)i2c_fifo_data[3]) << 16) | (((uint32_t)i2c_fifo_data[4]) << 8) | ((uint32_t)i2c_fifo_data[5])) & 0x3FFFFU;
 
 	return MAX30102_OK;
 }
@@ -120,11 +122,11 @@ MAX30102_STATUS Max30102_ReadTemperature(void)
 	uint8_t temp_int;
 	uint8_t temp_fraction;
 
-	if(MAX30102_OK != Max30102_ReadReg(REG_TEMP_INTR, &temp_int))
+	if (MAX30102_OK != Max30102_ReadReg(REG_TEMP_INTR, &temp_int))
 	{
 		return MAX30102_ERROR;
 	}
-	if(MAX30102_OK != Max30102_ReadReg(REG_TEMP_FRAC, &temp_fraction))
+	if (MAX30102_OK != Max30102_ReadReg(REG_TEMP_FRAC, &temp_fraction))
 	{
 		return MAX30102_ERROR;
 	}
@@ -133,7 +135,6 @@ MAX30102_STATUS Max30102_ReadTemperature(void)
 
 	return MAX30102_OK;
 }
-
 
 /****************************************************************************
  * Interrupts handling														*
@@ -154,7 +155,7 @@ MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t *Status)
 	{
 		return MAX30102_ERROR;
 	}
-	*Status |= tmp & 0x02;
+	*Status |= tmp & 0x02; // temperature interrupt
 
 	return MAX30102_OK;
 }
@@ -162,7 +163,8 @@ MAX30102_STATUS Max30102_ReadInterruptStatus(uint8_t *Status)
 void Max30102_InterruptCallback(void)
 {
 	uint8_t Status;
-	while (MAX30102_OK != Max30102_ReadInterruptStatus(&Status));
+	while (MAX30102_OK != Max30102_ReadInterruptStatus(&Status))
+		;
 
 	// Almost Full FIFO Interrupt handle
 	if (Status & (1 << INT_A_FULL_BIT))
@@ -183,7 +185,6 @@ void Max30102_InterruptCallback(void)
 	{
 		Max30102_ReadTemperature();
 	}
-
 }
 
 /****************************************************************************
@@ -273,7 +274,6 @@ void Max30102_StateMachine(void)
 	}
 }
 
-
 /****************************************************************************
  * LEDs current																*
  ***************************************************************************/
@@ -314,4 +314,3 @@ MAX30102_STATUS Max30102_Init(I2C_HandleTypeDef *i2c)
 	StateMachine = MAX30102_STATE_BEGIN;
 	return MAX30102_OK;
 }
-

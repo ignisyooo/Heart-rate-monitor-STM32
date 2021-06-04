@@ -18,6 +18,7 @@ list(APPEND TESTS
 #####################################   TEST ADD   ################################################
 foreach(TEST IN LISTS TESTS)
     add_subdirectory(${TESTS_DIR}/${TEST} ${TESTS_DIR}/${TEST})
-    add_subdirectory(${TESTS_DIR}/${TEST}/mocks &{MOCKS_DIR}/Mock_MAX30102)
+    add_subdirectory(${TESTS_DIR}/${TEST}/mocks ${MOCKS_DIR}/Mock_MAX30102)
 endforeach()
+
 add_subdirectory(../Drivers/STM32F3xx_HAL_Driver/Tests/mocks ${MOCKS_DIR}/Mock_HAL_Drivers)
