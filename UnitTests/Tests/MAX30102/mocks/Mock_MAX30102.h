@@ -6,6 +6,7 @@
 extern "C"
 {
 #include "MAX30102.h"
+#include "screen.h"
 }
 
 class Mock_MAX30102

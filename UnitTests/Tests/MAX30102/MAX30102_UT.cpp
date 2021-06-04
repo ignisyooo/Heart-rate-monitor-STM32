@@ -141,6 +141,7 @@ namespace
         hr_sensor.Sp02Value = 12;
         fifo.CollectedSamples = 10;
 
+
         Max30102_StateMachine();
 
         EXPECT_EQ(hr_sensor.HeartRate, 0);
@@ -164,6 +165,7 @@ namespace
         hr_sensor.IsFingerOnScreen = 0;
         EXPECT_CALL(*mock_HAL_Drivers, HAL_I2C_Mem_Write(_, _, _, _, _, _, _))
             .Times(2);
+
 
         Max30102_StateMachine();
 
@@ -213,6 +215,7 @@ namespace
         hr_sensor.IsFingerOnScreen = 0;
         EXPECT_CALL(*mock_HAL_Drivers, HAL_I2C_Mem_Write(_, _, _, _, _, _, _))
             .Times(2);
+
 
         Max30102_StateMachine();
 

@@ -4,6 +4,7 @@
 
 #include "MAX30102.h"
 #include "algorithm.h"
+#include "screen.h"
 
 #include "Unit_tests.h"
 
@@ -18,20 +19,20 @@ MAX30102_STATE StateMachine;
 /* Array with addresses and values for configuration of registers */
 static MAX30102_config_T config_data[] = {
 	{
-			.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02
+		.mem_adress = REG_INTR_ENABLE_2, .Value = 0x02
 	},
 	{
-			.mem_adress = REG_INTR_ENABLE_1, .Value = 0xc0
+		.mem_adress = REG_INTR_ENABLE_1, .Value = 0xc0
 	},
 	/* FIFO pointers setting */
 	{
 		.mem_adress = REG_FIFO_WR_PTR, .Value = 0x00
 	},
 	{
-			.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
+		.mem_adress = REG_FIFO_RD_PTR, .Value = 0x00
 	},
 	{
-			.mem_adress = REG_OVF_COUNTER, .Value = 0x00
+		.mem_adress = REG_OVF_COUNTER, .Value = 0x00
 	},
 	/* FIFO config settings - sample average = 4, fifo rollover = enable(?), fifo almost full value = 17 */
 	{
@@ -181,6 +182,7 @@ void Max30102_InterruptCallback(void)
 		Max30102_DataAnalysis();
 	}
 
+	// Temperature Interrupt handle
 	if (Status & (1 << INT_DIE_TEMP_RDY_BIT))
 	{
 		Max30102_ReadTemperature();
@@ -216,6 +218,7 @@ void Max30102_StateMachine(void)
 	switch (StateMachine)
 	{
 	case MAX30102_STATE_BEGIN:
+		Screen_func(MAX30102_STATE_BEGIN);
 		hr_sensor.HeartRate = 0;
 		hr_sensor.Sp02Value = 0;
 		if (hr_sensor.IsFingerOnScreen)
@@ -228,6 +231,7 @@ void Max30102_StateMachine(void)
 		break;
 
 	case MAX30102_STATE_CALIBRATE:
+		Screen_func(MAX30102_STATE_CALIBRATE);
 		if (hr_sensor.IsFingerOnScreen)
 		{
 			if (fifo.CollectedSamples > (MAX30102_BUFFER_LENGTH - MAX30102_SAMPLES_PER_SECOND))
@@ -243,6 +247,7 @@ void Max30102_StateMachine(void)
 		break;
 
 	case MAX30102_STATE_CALCULATE_HR:
+		Screen_func(MAX30102_STATE_CALCULATE_HR);
 		if (hr_sensor.IsFingerOnScreen)
 		{
 			maxim_heart_rate_and_oxygen_saturation(fifo.RedBuffer, fifo.IrBuffer, MAX30102_BUFFER_LENGTH - MAX30102_SAMPLES_PER_SECOND, fifo.BufferTail, &hr_sensor.Sp02Value, &hr_sensor.Sp02IsValid, &hr_sensor.HeartRate, &hr_sensor.IsHrValid);
@@ -258,6 +263,7 @@ void Max30102_StateMachine(void)
 		break;
 
 	case MAX30102_STATE_COLLECT_NEXT_PORTION:
+		Screen_func(MAX30102_STATE_COLLECT_NEXT_PORTION);
 		if (hr_sensor.IsFingerOnScreen)
 		{
 			if (fifo.CollectedSamples > MAX30102_SAMPLES_PER_SECOND)

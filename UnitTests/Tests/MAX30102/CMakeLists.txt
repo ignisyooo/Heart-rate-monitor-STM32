@@ -18,9 +18,12 @@ include_directories(
 add_library(${TEST_LIB}
     ${SOURCE_DIR}/MAX30102.c
     ${SOURCE_DIR}/algorithm.c
+    ${SOURCE_DIR}/screen.c
+    ${SOURCE_DIR}/SSD1331.c
+    ${SOURCE_DIR}/Fonts.c
 )
 
-target_link_libraries(${TEST_LIB} PRIVATE
+target_link_libraries(${TEST_LIB} PUBLIC
     Mock_HAL_Drivers
 )
 
